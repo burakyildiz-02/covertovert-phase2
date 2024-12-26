@@ -1,98 +1,39 @@
+# COVERTOVERT
+Open source implementation of "network" covert channels.
 
-# Covert Channel Implementation: Packet Bursting Using IP (CSC-PB-IP)
+## Installation
 
-This project implements a covert storage channel that leverages packet bursting with the IP protocol to encode and decode binary messages. The channel operates by transmitting bursts of IP packets, with different burst sizes representing binary bits.
+Install docker (and optionally compose V2 plugin - not the docker-compose!) and VSCode on your sytstem. Run the docker containers as non-root users.
 
-## Overview
+To start sender and receiver containers:
+```
+docker compose up -d
+```
 
-The covert channel consists of two primary functions:
-1. **`send`**: Encodes a binary message into IP packet bursts and transmits it.
-2. **`receive`**: Captures IP packet bursts, decodes them into binary bits, and reconstructs the original message.
+To stop sender and receiver containers:
+```
+docker compose down
+```
 
-The implementation uses `scapy` for packet crafting and sniffing.
+Note that, if you orchestrate your containers using docker compose, the containers will have hostnames ("sender" and "receiver") and DNS will be able to resolve them...
 
-## Features
+In one terminal, attach to the sender container
+```
+docker exec -it sender bash
+```
+In another terminal, attach to the receiver container
+```
+docker exec -it receiver bash
+```
 
-- **Binary Message Encoding**: Messages are encoded as bursts of IP packets, with specific burst sizes representing binary `1` and `0`.
-- **Message Decoding**: Captured IP bursts are decoded into binary bits and reconstructed into characters.
-- **Customizable Parameters**:
-  - `burst_size_1` and `burst_size_0`: Define the burst sizes for binary `1` and `0`.
-  - `idle_time`: Delay between bursts to ensure proper decoding.
-  - `idle_threshold`: Time threshold to detect the end of a burst during decoding.
-- **Stop Condition**: The receiver stops decoding when the message ends with `"."`.
+and you will be in your Ubuntu 22.04 Docker instance (python3.10.12 and scapy installed). After running the Ubuntu Docker, you can type "ip addr" or "ifconfig" to see your network configuration (work on eth0).
 
----
+Docker extension of VSCode will be of great benefit to you.
 
-## Implementation
+Note that if you develop code in these Docker instances and you stop the machine, your code will be lost. That is why it is recommended to use Github to store your code and clone in the machine, and push your code to Github before shutting the Docker instances down. The other option is to work in the /app folder in the sender and receiver Docker instances which are mounted to the "code" directory of your own machine.
 
-### `send` Function
-The `send` function encodes a binary message into IP packet bursts and transmits it:
+**IMPORTANT** Note that the "code" folder on your local machine are mounted to the "/app" folder (be careful it is in the root folder) in the sender and receiver Docker instances (read/write mode). You can use these folders (they are the same in fact) to develop your code. Other than the /app folder, this tool does not guarantee any persistent storage: if you exit the Docker instance, all data will be lost.
 
-#### **Input Parameters**
-- **`interface`**: Network interface to send packets (default: `eth0`).
-- **`burst_size_1` and `burst_size_0`**: Burst sizes for binary `1` and `0`.
-- **`idle_time`**: Delay between bursts (default: `0.1` seconds).
-- **`log_file_name`**: Log file for the sent message (default: `"sending_log.log"`).
+You can develop your code on your local folders ("code/sender" and "code/receiver") on your own host machine, they will be immediately synchronized with the "/app" folder on containers. The volumes are created in read-write mode, so changes can be made both on the host or on the containers. You can run your code on the containers.
 
-#### **Operation**
-1. The function generates or uses a predefined binary message.
-2. Each bit is encoded as a burst of IP packets:
-   - **Binary `1`**: Sent as `burst_size_1` packets.
-   - **Binary `0`**: Sent as `burst_size_0` packets.
-3. Bursts are separated by `idle_time` to ensure accurate decoding.
-
-### `receive` Function
-The `receive` function captures IP packets and decodes the transmitted message:
-
-#### **Input Parameters**
-- **`interface`**: Network interface to listen on (default: `eth0`).
-- **`burst_size_1` and `burst_size_0`**: Expected burst sizes for binary `1` and `0`. These must match the sender for consistency.
-- **`idle_threshold`**: Time threshold to detect the end of a burst (default: `0.05` seconds).
-- **`log_file_name`**: Log file for the received message (default: `"received_log.log"`).
-
-#### **Operation**
-1. Captures and processes incoming IP packets.
-2. Identifies bursts using timing and counts the number of packets in each burst.
-3. Decodes bursts into binary bits and reconstructs the message.
-4. Stops decoding when the message ends with `"."`.
-
----
-
-## Covert Channel Capacity
-
-The channel's capacity was evaluated by transmitting a known binary message and measuring the time taken for its transmission:
-
-1. A binary message of **128 bits (16 characters)** was sent.
-2. The transmission duration was recorded from the first to the last packet.
-3. Capacity was calculated using:
-   ```
-   Capacity (bps) = Total Bits / Transmission Time (seconds)
-   ```
-4. The observed capacity was **8.090786039468627 bits per second**.
-
----
-
-## Limitations and Constraints
-
-1. **Idle Time and Threshold**:
-   - The `idle_time` and `idle_threshold` parameters must be tuned for optimal performance.
-   - Higher values improve decoding accuracy but reduce channel capacity.
-   - Default settings: `idle_time = 0.1 seconds`, `idle_threshold = 0.05 seconds`.
-
-2. **Burst Sizes**:
-   - Default burst sizes are:
-     - `burst_size_1 = 2` for binary `1`.
-     - `burst_size_0 = 1` for binary `0`.
-   - Mismatched burst sizes between sender and receiver can cause decoding errors.
-
-3. **System Overheads**:
-   - Performance may vary based on the system or environment (e.g., virtualized networks or WSL).
-
-4. **Environmental Factors**:
-   - Network conditions such as latency and packet loss can affect the reliability of the covert channel.
-
----
-
-## Authors
-Burak Yildiz 2449049
-Aydin Dogan 
+Additionally, the local "examples" folder is mapped to the "/examples" folder in the containers. In that folder, there is a covert timing channel example including sender, receiver and base classes. In the second phase, you will implement a similar system, so it is recommended to look at the example for now.

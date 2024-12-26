@@ -8,7 +8,7 @@ Covert Channel documentation
 
 Burak Yildiz 2449049
 
-Aydin Dogan
+Aydin Dogan 2380293
 
 Group 83
 

@@ -1,18 +1,21 @@
 {
-  "covert_channel_code": "Replace it with the [Code] of chosen covert channel type seen in ODTUClass.",
+  "covert_channel_code": "CSC-PB-IP",
   "send": {
     "parameters": {
-      "parameter1": "p1",
-      "parameter2": 1234,
-      "log_file_name": "Example_UDPTimingInterarrivalChannelSender.log"
+      "interface": "eth0",
+      "burst_size_1": 2,
+      "burst_size_0": 1,
+      "idle_time": 0.1,
+      "log_file_name": "sending_log.log"
     }
   },
   "receive": {
     "parameters": {
-      "parameter1": "p1",
-      "parameter2": 1234,
-      "parameter3": "p3",
-      "log_file_name": "Example_UDPTimingInterarrivalChannelReceiver.log"
+      "interface": "eth0",
+      "burst_size_1": 2,
+      "burst_size_0": 1,
+      "idle_threshold": 0.05,
+      "log_file_name": "received_log.log"
     }
   }
 }

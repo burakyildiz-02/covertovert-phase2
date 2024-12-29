@@ -3,7 +3,6 @@
   "send": {
     "parameters": {
       "interface": "eth0",
-      "dst_ip": "172.18.0.3",
       "burst_size_1": 2,
       "burst_size_0": 1,
       "idle_time": 0.1,

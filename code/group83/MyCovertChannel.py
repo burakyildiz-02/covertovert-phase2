@@ -18,17 +18,24 @@ class MyCovertChannel(CovertChannelBase):
         """
         super().__init__()
 
-    def send(self, interface="eth0", dst_ip="172.18.0.3", burst_size_1=2, burst_size_0=1, idle_time=0.1, log_file_name="sending_log.log"):
+    def send(self, interface="eth0", burst_size_1=2, burst_size_0=1, idle_time=0.1, log_file_name="sending_log.log"):
         """
         Sends a covert message by encoding bits as ICMP packet burst patterns.
         
         Parameters:
         - interface: Network interface to send packets on (default: "eth0")
-        - dst_ip: Destination IP for the ICMP packets (default: "172.18.0.3")
         - burst_size_1: Number of packets in a burst to represent binary 1 (default: 2)
         - burst_size_0: Number of packets in a burst to represent binary 0 (default: 1)
         - idle_time: Time to wait between bursts in seconds (default: 0.1)
         - log_file_name: File to log the sent message (default: "sending_log.log")
+        
+        Implementation:
+        1. Generates random binary message and logs it
+        2. For each bit:
+           - Determines burst size (size_1 for 1, size_0 for 0)
+           - Sends burst of ICMP packets
+           - Waits idle_time between bursts
+        3. Sends final packet to ensure last character processing
         """
         binary_message = self.generate_random_binary_message_with_logging(log_file_name)
         print(f"Sending binary message: {binary_message}")
@@ -40,14 +47,14 @@ class MyCovertChannel(CovertChannelBase):
             
             # Send burst
             for _ in range(burst_size):
-                packet = IP(dst=dst_ip)/ICMP()
+                packet = IP(dst="172.18.0.3")/ICMP()
                 super().send(packet, interface=interface)
             
             # Wait between bursts
             time.sleep(idle_time)
 
         # Send a last packet to convert last bits to char
-        packet = IP(dst=dst_ip)/ICMP()
+        packet = IP(dst="172.18.0.3")/ICMP()
         super().send(packet, interface=interface)
 
     def receive(self, interface="eth0", burst_size_1=2, burst_size_0=1, idle_threshold=0.05, log_file_name="received_log.log"):
